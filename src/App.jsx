@@ -10,17 +10,19 @@ const App = () => {
   const chatBodyRef = useRef();
   const generateBotResponse = async (history) => {
 
-    const updateHistory =(text) =>{
-      setChatHistory((prev) => [...prev.filter(msg=>msg.text !=="Thinking..."),{role:"model",text}]);
+    const updateHistory = (text) => {
+      setChatHistory((prev) => [...prev.filter(msg => msg.text !== "Thinking..."), { role: "model", text }]);
     }
 
 
     try {
 
-    history = history.map(({ role, text }) => ({role,parts:[{text}]}));
+      history = history.map(({ role, text }) => ({ role, parts: [{ text }] }));
+      console.log("Payload gửi lên Gemini:", JSON.stringify(history, null, 2));
+      console.log("KEY:", import.meta.env.VITE_GEMINI_API_KEY);
 
       const response = await axios.post(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
         { contents: history },
         {
           headers: {
@@ -29,12 +31,12 @@ const App = () => {
           },
         }
       );
-  
+
       const botText = response.data.candidates[0]?.content?.parts[0]?.text.trim();
       updateHistory(botText);
 
     } catch (error) {
-      console.error("Error generating bot response:", error);
+      console.error("Gemini API error:", JSON.stringify(error.response?.data, null, 2));
     }
   };
 
@@ -42,7 +44,7 @@ const App = () => {
     // Scroll to the bottom of the chat body when new messages are added
     if (chatBodyRef.current) {
       chatBodyRef.current.scrollTo({
-        top: chatBodyRef.current.scrollHeight, 
+        top: chatBodyRef.current.scrollHeight,
         behavior: "smooth"
       });
     }
@@ -63,9 +65,9 @@ const App = () => {
         fontWeight: 700,
         letterSpacing: '0.5px',
         zIndex: 10,
-        pointerEvents: 'none', 
+        pointerEvents: 'none',
       }}>
-        Welcome to the AI ChatBot Demo!<br/>
+        Welcome to the AI ChatBot Demo!<br />
         Ask anything, get instant answers.
       </div>
       <div className={`container ${showChatbot ? 'show' : ''}`}>
@@ -82,8 +84,8 @@ const App = () => {
               <h3>ChatBot</h3>
               <p>Online</p>
             </div>
-            <button 
-              onClick={() => setShowChatbot(false)} 
+            <button
+              onClick={() => setShowChatbot(false)}
               className="material-symbols-rounded"
             >
               close
